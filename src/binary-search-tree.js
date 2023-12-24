@@ -8,109 +8,106 @@ const { Node } = require('../extensions/list-tree.js');
 */
 class BinarySearchTree {
   constructor() {
-    this.head = null;
+    this.rootNode = null;
   }
 
   root() {
-    return this.head;
+    return this.rootNode;
   }
 
   add(data) {
-    const newNode = new Node(data);
-    if (this.head === null) {
-      this.head = newNode
-    } else {
-      this.addNode(this.head, newNode);
-    }
+    this.rootNode = this.addNode(this.rootNode, data)
   }
 
-  addNode(node, newNode) {
-    if (newNode.data < node.data) {
-      node.left === null ?
-        node.left = newNode :
-        this.addNode(node.left, newNode);
-    } else {
-      node.right === null ?
-        node.right = newNode :
-        this.addNode(node.right, newNode);
-    }
+  addNode(node, data) {
+    if (!node) return new Node(data);
+    if (data === node.data) return node;
+    if (data > node.data) node.right = this.addNode(node.right, data);
+    if (data < node.data) node.left = this.addNode(node.left, data);
+
+    return node;
   }
 
   has(data) {
-    return this.searchNode(data) !== null;
+    let node = this.rootNode;
+
+    while (node) {
+      if (node.data === data) return true;
+      
+      data < node.data ?
+        node = node.left :
+        node = node.right;
+    }
+
+    return false;
   }
 
   find(data) {
-    return this.searchNode(data);
-  }
+    let node = this.rootNode;
 
-  searchNode(data) {
-    let currentNode = this.head;
+    while (node) {
+      if (node.data === data) return node;
 
-    while (currentNode !== null) {
-      if (data === currentNode.data) {
-        return currentNode;
-      } else if (data < currentNode.data) {
-        currentNode = currentNode.left;
-      } else {
-        currentNode = currentNode.right;
-      }
+      data < node.data ?
+        node = node.left :
+        node = node.right;
     }
 
     return null;
   }
 
   remove(data) {
-    this.head = this.removeNode(this.head, data);
+    this.rootNode = this.removeNode(this.rootNode, data);
   }
 
   removeNode(node, data) {
-    if (!node) return;
+    if (!node) return null;
 
+    if (data === node.data) {
+      if (!node.left && !node.right) return null;
+      if (!node.left) return node.right;
+      if (!node.right) return node.left;
+    }
     if (data < node.data) {
       node.left = this.removeNode(node.left, data);
-    } else if (node.data < data) {
-      node.right = this.removeNode(node.right, data);
-    } else {
-      if (!node.left && !node.right) return null;
-
-      if (!node.left) return node.right;
-
-      if (!node.right) return node.left;
-
-      // случай, когда оба поддерева существуют
-      let minFromRight = node.right;
-
-      while (minFromRight.left) {
-        minFromRight = minFromRight.left;
-      }
-
-      node.data = minFromRight.data;
-      node.right = removeNode(node.right, minFromRight.data);
       return node;
     }
+    if (data > node.data) {
+      node.right = this.removeNode(node.right, data);
+      return node;
+    }
+
+    let min = node.right;
+
+    while (min.left) min = min.left;
+
+    node.data = min.data;
+    node.right = this.removeNode(node.right, min.data);
+    return node;
   }
 
   min() {
-    if (!this.head) return;
+    let node = this.rootNode;
 
-    let currentNode = this.head;
-    while (currentNode.left) {
-      currentNode = currentNode.left;
+    if (!node.left) return;
+
+    while (node.left) {
+      node = node.left;
     }
 
-    return currentNode.data;
+    return node.data;
   }
 
   max() {
-    if (!this.head) return;
+    let node = this.rootNode;
 
-    let currentNode = this.head;
-    while (currentNode.right) {
-      currentNode = currentNode.right;
+    if (!node.right) return;
+
+    while (node.right) {
+      node = node.right;
     }
 
-    return currentNode.data;
+    return node.data;
   }
 }
 
